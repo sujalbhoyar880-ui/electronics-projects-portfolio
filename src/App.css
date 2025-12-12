@@ -1,0 +1,190 @@
+/* src/App.css - paste exactly as is */
+
+/* --- Reset + base --- */
+:root{
+  --bg:#070a0c;
+  --panel:#07101f;
+  --accent:#00eaff;
+  --muted:#98a2b3;
+  --card:#0a0f24;
+  --glass: rgba(255,255,255,0.03);
+  --sidebar-w: 260px;
+  --sidebar-collapsed-w: 70px;
+  --radius:12px;
+}
+
+*{box-sizing:border-box}
+html,body,#root{height:100%;}
+body{
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(180deg,#020617 0%, #05060a 100%);
+  color:#e6eef8;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* overall app layout */
+.app-root{min-height:100vh;display:flex;flex-direction:column;}
+.app-main{flex:1;display:flex;}
+
+/* Admin layout container */
+.admin-layout{
+  display:flex;
+  width:100%;
+  min-height:100vh;
+}
+
+/* Sidebar area (left) */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: linear-gradient(90deg,#060809, #071010);
+  border-right: 2px solid rgba(0,234,255,0.08);
+  padding:22px 14px;
+  box-shadow: 0 0 30px rgba(0,234,255,0.05);
+  position:fixed;
+  top:0;
+  left:0;
+  bottom:0;
+  overflow:auto;
+  transition: width .25s ease, transform .35s ease;
+  z-index:100;
+}
+
+/* When collapsed (if you implement a collapsed state toggle via .sidebar.collapsed) */
+.sidebar.collapsed{
+  width: var(--sidebar-collapsed-w);
+  min-width: var(--sidebar-collapsed-w);
+}
+
+/* Content area to the right of sidebar */
+.admin-content{
+  flex:1;
+  margin-left: var(--sidebar-w); /* make room for the sidebar */
+  padding: 48px 56px;
+  transition: margin-left .25s ease, padding .25s ease;
+}
+
+/* adjust when sidebar collapsed */
+.sidebar.collapsed + .admin-content{
+  margin-left: var(--sidebar-collapsed-w);
+  padding-left: 24px;
+}
+
+/* Page heading */
+.page-title{
+  font-size:32px;
+  font-weight:700;
+  text-align:center;
+  margin-bottom:26px;
+  color: #ffffff;
+  text-shadow: 0 0 18px rgba(0,234,255,0.06);
+}
+
+/* ---------- Form / AddProject styles ---------- */
+.admin-form {
+  max-width: 920px;
+  margin: 0 auto;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 28px;
+  border: 1px solid rgba(0,234,255,0.06);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
+
+/* two-column label/value pairs when viewport wide, stacks on small screens */
+.form-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+/* split into 2 columns on wider screens */
+@media (min-width:840px){
+  .form-grid.two-col{
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+}
+
+/* basic label + input styling */
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.field label{
+  font-size:13px;
+  color:var(--muted);
+}
+.field input[type="text"],
+.field input[type="number"],
+.field textarea,
+.field select {
+  padding:10px 12px;
+  border-radius:8px;
+  background:var(--glass);
+  border: 1px solid rgba(255,255,255,0.04);
+  color: #e6eef8;
+  outline: none;
+  font-size:14px;
+}
+.field textarea{ min-height:120px; resize:vertical; }
+
+/* file input - keep small and inline with label */
+.file-row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.file-row input[type="file"]{
+  padding:6px;
+  background:transparent;
+  color:#e6eef8;
+}
+
+/* preview image */
+.preview-img{
+  display:block;
+  max-width:260px;
+  border-radius:10px;
+  margin-top:12px;
+  border:1px solid rgba(255,255,255,0.04);
+}
+
+/* submit row */
+.form-actions{
+  margin-top:18px;
+  display:flex;
+  gap:12px;
+  justify-content:flex-end;
+  align-items:center;
+}
+.btn{
+  background:var(--accent);
+  color:#002;
+  padding:10px 16px;
+  border-radius:10px;
+  border:none;
+  font-weight:700;
+  cursor:pointer;
+}
+.btn.ghost{
+  background:transparent;
+  color:var(--muted);
+  border:1px solid rgba(255,255,255,0.03);
+}
+
+/* small helpers */
+.small{ font-size:13px; color:var(--muted); }
+.center{ text-align:center; }
+
+/* Responsive: full width form on small screens */
+@media (max-width:760px){
+  .admin-content{ padding:20px; margin-left:0; }
+  .sidebar{ position:relative; width:100%; height:auto; min-height:0; border-right:none;}
+  .sidebar.collapsed{ display:none; }
+  .admin-form{ margin: 10px; }
+}

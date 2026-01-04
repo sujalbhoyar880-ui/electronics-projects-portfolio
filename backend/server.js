@@ -1,4 +1,6 @@
 // backend/server.js
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const Razorpay = require("razorpay");
@@ -7,18 +9,23 @@ const crypto = require("crypto");
 const app = express();
 app.use(express.json());
 
-// ⚠️ For dev: allow your Vite URL
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://electronics-projects-site.web.app", // after deploy
+    ],
   })
 );
+app.get("/", (req, res) => {
+  res.send("Backend running OK 🚀");
+});
 
-// 🔐 YOUR TEST KEYS (from Razorpay dashboard)
-const RAZORPAY_KEY_ID = "rzp_test_RjCP0j5NwZCDyJ"; // your test key id
-const RAZORPAY_KEY_SECRET = "eXeKsKNa4uKWnTu1V0UQtqCI"; // DO NOT EMPTY
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 
-// 1) Create Razorpay order
+
+// ✅ Create Razorpay order
 app.post("/create-order", async (req, res) => {
   try {
     const { amount, projectId, projectTitle } = req.body;
@@ -29,56 +36,47 @@ app.post("/create-order", async (req, res) => {
     });
 
     const order = await razorpay.orders.create({
-      amount, // in paise
+      amount, // paise
       currency: "INR",
       receipt: `order_${projectId}_${Date.now()}`,
     });
 
-    return res.json({
+    res.json({
       success: true,
       keyId: RAZORPAY_KEY_ID,
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      projectId,
-      projectTitle,
     });
   } catch (err) {
-    console.error("Error creating order:", err);
-    res.status(500).json({ success: false, message: "Order creation failed" });
+    console.error(err);
+    res.status(500).json({ success: false });
   }
 });
 
-// 2) Verify payment signature (optional but recommended)
+// ✅ Verify payment
 app.post("/verify-payment", (req, res) => {
-  try {
-    const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-    } = req.body;
+  const {
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+  } = req.body;
 
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
+  const body = razorpay_order_id + "|" + razorpay_payment_id;
 
-    const expectedSignature = crypto
-      .createHmac("sha256", RAZORPAY_KEY_SECRET)
-      .update(body.toString())
-      .digest("hex");
+  const expectedSignature = crypto
+    .createHmac("sha256", RAZORPAY_KEY_SECRET)
+    .update(body)
+    .digest("hex");
 
-    if (expectedSignature === razorpay_signature) {
-      return res.json({ success: true });
-    } else {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid signature" });
-    }
-  } catch (err) {
-    console.error("Error verifying payment:", err);
-    res.status(500).json({ success: false, message: "Verification failed" });
+  if (expectedSignature === razorpay_signature) {
+    res.json({ success: true });
+  } else {
+    res.status(400).json({ success: false });
   }
 });
 
-const PORT = 5000;
-app.listen(PORT, () => {
-  console.log(`Backend server running on http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () =>
+  console.log(`✅ Backend running on http://localhost:${PORT}`)
+);
